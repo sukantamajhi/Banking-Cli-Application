@@ -1,20 +1,33 @@
 name: Rust
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    push:
+        branches: ["master"]
+    pull_request:
+        branches: ["master"]
 
 env:
-  CARGO_TERM_COLOR: always
+    CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+    build:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build
+              run: cargo build --verbose
+            - name: Check formatting
+              run: cargo fmt -- --check
+            - name: Run clippy
+              run: cargo clippy -- -D warnings
+            - name: Run code coverage
+              run: |
+                  cargo install cargo-tarpaulin
+                  cargo tarpaulin --verbose --workspace
+            - name: Build documentation
+              run: cargo doc --no-deps
+            - name: Check for outdated dependencies
+              run: |
+                  cargo install cargo-outdated
+                  cargo outdated --exit-code 1
